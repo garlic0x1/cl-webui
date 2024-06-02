@@ -1,6 +1,6 @@
 # Overview
 
-Bindings for [webui](https://github.com/webui-dev/webui)
+Bindings for [webui](https://github.com/webui-dev/webui).
 
 ```lisp
 (let ((w (webui-new-window)))
@@ -17,3 +17,16 @@ Bindings for [webui](https://github.com/webui-dev/webui)
 ```
 
 ![demo-1](screenshots/demo-1.png)
+
+# Setup
+
+I installed webui like this on Linux:
+
+```bash
+git clone https://github.com/webui-dev/webui
+cd webui/
+make
+cp dist/webui-2.so /usr/lib/webui-2.so
+```
+
+Feel free to contribute ways to load webui for Mac or Windows.
