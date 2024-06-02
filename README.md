@@ -16,4 +16,4 @@ Bindings for [webui](https://github.com/webui-dev/webui)
   (webui-wait))
 ```
 
-!(screenshots/demo-1.png)
+![demo-1](screenshots/demo-1.png)
