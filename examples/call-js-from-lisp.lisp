@@ -5,9 +5,7 @@
 
 (defparameter *script* "
 let count = 0;
-function GetCount() {
-  return count;
-}
+function GetCount() { return count; }
 function SetCount(number) {
   document.getElementById('count').innerHTML = number;
   count = number;

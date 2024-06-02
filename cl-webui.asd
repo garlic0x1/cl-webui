@@ -7,4 +7,5 @@
 (asdf:defsystem "cl-webui/examples"
   :depends-on (:cffi :cl-webui :str :hiccl)
   :components ((:file "examples/minimal")
-               (:file "examples/call-js-from-lisp")))
+               (:file "examples/call-js-from-lisp")
+               (:file "examples/call-lisp-from-js")))

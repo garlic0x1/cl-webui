@@ -84,22 +84,20 @@
   (event-number :unsigned-int)
   (bind-id :unsigned-int))
 
-(defstruct webui-event
-  window
-  event-type
-  element-id
-  event-number
-  bind-id)
+(defun webui-event-window (self)
+  (foreign-slot-value self '(:struct webui-event-t) 'window))
 
-(defun translate-webui-event (event)
-  (with-foreign-slots ((window event-type element-id event-number bind-id)
-                       event
-                       (:struct webui-event-t))
-    (make-webui-event :window window
-                      :event-type event-type
-                      :element-id element-id
-                      :event-number event-number
-                      :bind-id bind-id)))
+(defun webui-event-event-type (self)
+  (foreign-slot-value self '(:struct webui-event-t) 'event-type))
+
+(defun webui-event-element-id (self)
+  (foreign-slot-value self '(:struct webui-event-t) 'element-id))
+
+(defun webui-event-event-number (self)
+  (foreign-slot-value self '(:struct webui-event-t) 'event-number))
+
+(defun webui-event-bind-id (self)
+  (foreign-slot-value self '(:struct webui-event-t) 'bind-id))
 
 (defcfun "webui_new_window" size-t
   "@brief Create a new WebUI window object.
@@ -138,7 +136,7 @@ element means all events.
 
 @example webui_bind(myWindow, \"myID\", myFunction);"
   (defcallback webui-bind-cb :void ((event :pointer))
-    (funcall func (translate-webui-event event)))
+    (funcall func event))
   (foreign-funcall "webui_bind"
                    size-t window
                    :string element-id
@@ -585,7 +583,7 @@ will generate a self-signed certificate.
 @example long long int myNum = webui_get_int(e);"
   (event :pointer))
 
-(defcfun "webui_get_float_at" :float
+(defcfun "webui_get_float_at" :double
   "@brief Get an argument as float at a specific index
 
 @param e The event struct
@@ -597,7 +595,7 @@ will generate a self-signed certificate.
   (event :pointer)
   (index size-t))
 
-(defcfun "webui_get_float" :float
+(defcfun "webui_get_float" :double
   "@brief Get the first argument as float
 
 @param e The event struct
@@ -691,7 +689,7 @@ will generate a self-signed certificate.
 
 @example webui_return_float(e, 123.321);"
   (event :pointer)
-  (f :float))
+  (f :double))
 
 (defcfun "webui_return_string" :void
   "@brief Return the response to JavaScript as string.
