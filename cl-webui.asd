@@ -2,7 +2,9 @@
   :author "garlic0x1"
   :license "MIT"
   :depends-on (:cffi)
-  :components ((:file "webui"))
-  :build-operation "program-op"
-  :build-pathname "test-webui"
-  :entry-point "webui::test-webui")
+  :components ((:file "webui")))
+
+(asdf:defsystem "cl-webui/examples"
+  :depends-on (:cffi :cl-webui :str :hiccl)
+  :components ((:file "examples/minimal")
+               (:file "examples/call-js-from-lisp")))

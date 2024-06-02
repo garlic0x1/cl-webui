@@ -1,6 +1,11 @@
 (defpackage :webui
   (:use :cl :cffi)
   (:export :webui-event-t
+           :webui-event-window
+           :webui-event-event-type
+           :webui-event-element-id
+           :webui-event-event-number
+           :webui-event-bind-id
            :webui-new-window
            :webui-new-window-id
            :webui-get-new-window-id
@@ -65,7 +70,8 @@
            :webui-interface-get-string-at
            :webui-interface-get-int-at
            :webui-interface-get-bool-at
-           :webui-interface-get-size-at))
+           :webui-interface-get-size-at
+           ))
 (in-package :webui)
 
 (use-foreign-library "webui-2.so")
@@ -75,9 +81,26 @@
 (defcstruct webui-event-t
   (window size-t)
   (event-type :unsigned-int)
-  (element-id :string)
+  (element-id :pointer)
   (event-number :unsigned-int)
   (bind-id :unsigned-int))
+
+(defstruct webui-event
+  window
+  event-type
+  element-id
+  event-number
+  bind-id)
+
+(defun translate-webui-event (event)
+  (with-foreign-slots ((window event-type element-id event-number bind-id)
+                       event
+                       (:struct webui-event-t))
+    (make-webui-event :window window
+                      :event-type event-type
+                      :element-id element-id
+                      :event-number event-number
+                      :bind-id bind-id)))
 
 (defcfun "webui_new_window" size-t
   "@brief Create a new WebUI window object.
@@ -104,7 +127,7 @@
 
 @example size_t myWindowNumber = webui_get_new_window_id();")
 
-(defcfun "webui_bind" size-t
+(defun webui-bind (window element-id func)
   "@brief Bind a specific html element click event with a function. Empty
 element means all events.
 
@@ -115,13 +138,16 @@ element means all events.
 @return Returns a unique bind ID.
 
 @example webui_bind(myWindow, \"myID\", myFunction);"
-  (window size-t)
-  (element-id :string)
-  (func :pointer))
+  (defcallback webui-bind-cb :void ((event :pointer))
+    (funcall func (translate-webui-event event)))
+  (foreign-funcall "webui_bind"
+                   size-t window
+                   :string element-id
+                   :pointer (callback webui-bind-cb)
+                   size-t))
 
 (defcfun "webui_show" :bool
-  "
-@brief Show a window using embedded HTML, or a file. If the window is already
+  "@brief Show a window using embedded HTML, or a file. If the window is already
 open, it will be refreshed.
 
 @param window The window number
@@ -130,8 +156,7 @@ open, it will be refreshed.
 @return Returns True if showing the window is successed.
 
 @example webui_show(myWindow, \"<html>...</html>\"); | webui_show(myWindow,
-\"index.html\"); | webui_show(myWindow, \"http://...\");
-"
+\"index.html\"); | webui_show(myWindow, \"http://...\");"
   (window size-t)
   (content :string))
 
@@ -497,13 +522,33 @@ will generate a self-signed certificate.
   (script :string))
 
 ;; TODO
-(defcfun "webui_script" :bool)
+(defun webui-script (window script timeout &key (max-len 1024))
+  "@brief Run JavaScript and get the response back.
+ Make sure your local buffer can hold the response.
+
+ @param window The window number
+ @param script The JavaScript to be run
+ @param timeout The execution timeout
+ @param buffer The local buffer to hold the response
+ @param buffer_length The local buffer size
+
+ @return Returns True if there is no execution error
+
+ @example bool err = webui_script(myWindow, \"return 4 + 6;\", 0, myBuffer, myBufferSize);"
+  (with-foreign-pointer-as-string (result max-len)
+    (foreign-funcall "webui_script"
+                     size-t window
+                     :string script
+                     size-t timeout
+                     :pointer result
+                     size-t max-len
+                     :bool)))
 
 (defcfun "webui_set_runtime" :void
   "@brief Chose between Deno and Nodejs as runtime for .js and .ts files.
 
-@param window The window number
-@param runtime Deno | Nodejs
+  @param window The window number
+  @param runtime Deno | Nodejs
 
 @example webui_set_runtime(myWindow, Deno);"
   (window size-t)
