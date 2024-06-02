@@ -35,7 +35,7 @@ function AutoTest(number) {
     (webui-bind w "MyButton1"
                 (lambda (ev)
                   (let* ((w (webui-event-window ev))
-                         (c (webui-script w "return GetCount();" 1000))
+                         (c (webui-script w "return GetCount();"))
                          (n (1+ (parse-integer c))))
                     (webui-run w (format nil "SetCount(~a);" n)))))
     (webui-bind w "MyButton2"

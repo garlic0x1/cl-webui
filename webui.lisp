@@ -70,8 +70,7 @@
            :webui-interface-get-string-at
            :webui-interface-get-int-at
            :webui-interface-get-bool-at
-           :webui-interface-get-size-at
-           ))
+           :webui-interface-get-size-at))
 (in-package :webui)
 
 (use-foreign-library "webui-2.so")
@@ -521,8 +520,7 @@ will generate a self-signed certificate.
   (window size-t)
   (script :string))
 
-;; TODO
-(defun webui-script (window script timeout &key (max-len 1024))
+(defun webui-script (window script &key (timeout 60000) (max-len 1024))
   "@brief Run JavaScript and get the response back.
  Make sure your local buffer can hold the response.
 
@@ -536,13 +534,14 @@ will generate a self-signed certificate.
 
  @example bool err = webui_script(myWindow, \"return 4 + 6;\", 0, myBuffer, myBufferSize);"
   (with-foreign-pointer-as-string (result max-len)
-    (foreign-funcall "webui_script"
-                     size-t window
-                     :string script
-                     size-t timeout
-                     :pointer result
-                     size-t max-len
-                     :bool)))
+    (unless (foreign-funcall "webui_script"
+                             size-t window
+                             :string script
+                             size-t timeout
+                             :pointer result
+                             size-t max-len
+                             :bool)
+      (error (format nil "Failed to run script: ~a" script)))))
 
 (defcfun "webui_set_runtime" :void
   "@brief Chose between Deno and Nodejs as runtime for .js and .ts files.
@@ -714,7 +713,7 @@ will generate a self-signed certificate.
   (event :pointer)
   (bool :bool))
 
-(defcfun "webui_interface_bind" size-t
+(defun webui-interface-bind (window element func)
   "@brief Bind a specific HTML element click event with a function. Empty element means all events.
 
 @param window The window number
@@ -724,9 +723,17 @@ will generate a self-signed certificate.
 @return Returns unique bind ID
 
 @example size_t id = webui_interface_bind(myWindow, \"myID\", myCallback);"
-  (window size-t)
-  (element :string)
-  (func :pointer))
+  (defcallback cb :void ((window size-t)
+                         (event-type :unsigned-int)
+                         (element :pointer)
+                         (event-number :unsigned-int)
+                         (bind-id :unsigned-int))
+    (funcall func window event-type element event-number bind-id))
+  (foreign-funcall "webui_interface_bind"
+                   size-t window
+                   :string element
+                   :pointer (callback cb)
+                   size-t))
 
 (defcfun "webui_interface_set_response" :void
   "@brief When using `webui_interface_bind()`, you may need this function to easily set a response.
