@@ -21,9 +21,9 @@ function AutoTest(number) {
     `(:html
       (:head
        (:script :src "webui.js")
-       (:title "Call JavaScript from C example"))
+       (:title "Call JavaScript from Lisp example"))
       (:body
-       (:h1 "WebUI - Call JS from C") (:br)
+       (:h1 "WebUI - Call JS from Lisp") (:br)
        (:h1 :id "count" "0") (:br)
        (:button :id "MyButton1" "Manual Count") (:br)
        (:button :id "MyTest" :onclick "AutoTest();" "Auto Count") (:br)
@@ -35,14 +35,13 @@ function AutoTest(number) {
     (webui-bind w "MyButton1"
                 (lambda (ev)
                   (let* ((w (webui-event-window ev))
-                         (c (webui-script w "return GetCount();" 1000)))
-                    ;; (webui-run w (format nil "alert('~a');" c))
-                    (let ((n (1+ (parse-integer c))))
-                      (webui-run w (format nil "SetCount(~a);" n))))))
+                         (c (webui-script w "return GetCount();" 1000))
+                         (n (1+ (parse-integer c))))
+                    (webui-run w (format nil "SetCount(~a);" n)))))
     (webui-bind w "MyButton2"
                 (lambda (ev)
                   (declare (ignore ev))
-                  (webui-exit)))
+                  (webui-close w)))
     (webui-show w *html*)
     (webui-wait)
-    (webui-clean)))
+    (webui-destroy w)))

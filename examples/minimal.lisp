@@ -6,5 +6,4 @@
 (defun run ()
   (let ((w (webui-new-window)))
     (webui-show w "<html>Hello, world!</html>")
-    (webui-wait)
-    (webui-clean)))
+    (webui-wait)))
