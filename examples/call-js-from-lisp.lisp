@@ -26,6 +26,10 @@ function AutoTest(number) {
        (:button :id "MyButton1" "Manual Count") (:br)
        (:button :id "MyTest" :onclick "AutoTest();" "Auto Count") (:br)
        (:button :id "MyButton2" "Exit")
+       ;; boost engagement on x dot com
+       (:img
+        :src "https://i.redd.it/a6dxsn8dpsu61.png"
+        :style "width: 200px; position: fixed; bottom: 10px; right: 10px;")
        (:script (:raw ,*script*))))))
 
 (defun run ()
