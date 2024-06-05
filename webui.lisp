@@ -1,6 +1,19 @@
 (defpackage :webui
   (:use :cl :cffi)
-  (:export :webui-event-t
+  (:export :+webui-no-browser+
+           :+webui-any-browser+
+           :+webui-chrome+
+           :+webui-firefox+
+           :+webui-edge+
+           :+webui-safari+
+           :+webui-chromium+
+           :+webui-opera+
+           :+webui-brave+
+           :+webui-vivaldi+
+           :+webui-epic+
+           :+webui-yandex+
+           :+webui-chromium-based+
+           :webui-event-t
            :webui-event-window
            :webui-event-event-type
            :webui-event-element-id
@@ -12,7 +25,7 @@
            :webui-bind
            :webui-show
            :webui-show-browser
-           :webui-show-wb
+           :webui-show-wv
            :webui-show-kiosk
            :webui-wait
            :webui-close
@@ -77,6 +90,21 @@
 
 (defctype size-t :unsigned-int)
 
+(defcenum webui-browsers
+  +webui-no-browser+
+  +webui-any-browser+
+  +webui-chrome+
+  +webui-firefox+
+  +webui-edge+
+  +webui-safari+
+  +webui-chromium+
+  +webui-opera+
+  +webui-brave+
+  +webui-vivaldi+
+  +webui-epic+
+  +webui-yandex+
+  +webui-chromium-based+)
+
 (defcstruct webui-event-t
   (window size-t)
   (event-type :unsigned-int)
@@ -124,7 +152,7 @@
 
 @example size_t myWindowNumber = webui_get_new_window_id();")
 
-(defun webui-bind (window element-id func)
+(defmacro webui-bind (window element-id func)
   "@brief Bind a specific html element click event with a function. Empty
 element means all events.
 
@@ -135,13 +163,15 @@ element means all events.
 @return Returns a unique bind ID.
 
 @example webui_bind(myWindow, \"myID\", myFunction);"
-  (defcallback webui-bind-cb :void ((event :pointer))
-    (funcall func event))
-  (foreign-funcall "webui_bind"
-                   size-t window
-                   :string element-id
-                   :pointer (callback webui-bind-cb)
-                   size-t))
+  (let ((cb (gensym)))
+    `(progn
+       (defcallback ,cb :void ((event :pointer))
+         (funcall ,func event))
+       (foreign-funcall "webui_bind"
+                        size-t ,window
+                        :string ,element-id
+                        :pointer (callback ,cb)
+                        size-t))))
 
 (defcfun "webui_show" :bool
   "@brief Show a window using embedded HTML, or a file. If the window is already
