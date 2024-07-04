@@ -86,7 +86,10 @@
            :webui-interface-get-size-at))
 (in-package :webui)
 
-(use-foreign-library "webui-2.so")
+(define-foreign-library libwebui
+  (:unix (:or "webui-2.so" "libwebui.so")))
+
+(use-foreign-library libwebui)
 
 (defctype size-t :unsigned-int)
 
