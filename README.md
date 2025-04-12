@@ -29,4 +29,13 @@ make
 cp dist/webui-2.so /usr/lib/webui-2.so
 ```
 
-Feel free to contribute ways to load webui for Mac or Windows.
+# Setup for mac
+
+```bash
+git clone https://github.com/webui-dev/webui
+cd webui/
+make
+sudo cp dist/libwebui-2.dylib /usr/local/lib/libwebui-2.dylib
+```
+
+Feel free to contribute ways to load webui for Windows.
