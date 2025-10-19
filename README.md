@@ -1,3 +1,8 @@
+# DISCLAIMER
+
+[webui](https://github.com/webui-dev/webui) does not seem to support
+Linux anymore, so I am abandoning this library.
+
 # Overview
 
 Bindings for [webui](https://github.com/webui-dev/webui).
